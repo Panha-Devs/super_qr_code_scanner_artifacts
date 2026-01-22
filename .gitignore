@@ -1,2 +1,10 @@
 dist/*
 !dist/*.zip
+temp/*
+logs/*
+*.log
+.DS_Store
+.idea/
+.vscode/
+node_modules/
+.env
