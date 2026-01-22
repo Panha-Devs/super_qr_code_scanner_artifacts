@@ -18,6 +18,13 @@ ROOT_BUILD_DIR="$REPO_ROOT/artifacts/build"
 #   ./build_opencv.sh android armeabi-v7a
 #   ./build_opencv.sh android all  (builds both 32-bit and 64-bit)
 #   ./build_opencv.sh ios arm64
+#   ./build_opencv.sh ios x86_64
+#   ./build_opencv.sh ios all              # Both device and simulator
+#   ./build_opencv.sh macos x86_64
+#   ./build_opencv.sh macos arm64
+#   ./build_opencv.sh macos all            # Both x86_64 and arm64
+#   ./build_opencv.sh windows x64
+#   ./build_opencv.sh linux x64
 
 PLATFORM=$1
 ARCH=$2
@@ -33,6 +40,11 @@ if [[ -z "$PLATFORM" || -z "$ARCH" ]]; then
   echo "  ./build_opencv.sh ios arm64            # Device"
   echo "  ./build_opencv.sh ios x86_64           # Simulator"
   echo "  ./build_opencv.sh ios all              # Both device and simulator"
+  echo "  ./build_opencv.sh macos x86_64         # Intel"
+  echo "  ./build_opencv.sh macos arm64          # Apple Silicon"
+  echo "  ./build_opencv.sh macos all            # Both Intel and Apple Silicon"
+  echo "  ./build_opencv.sh windows x64          # 64-bit Windows"
+  echo "  ./build_opencv.sh linux x64            # 64-bit Linux"
   exit 1
 fi
 
@@ -54,6 +66,15 @@ if [[ "$PLATFORM" == "ios" && "$ARCH" == "all" ]]; then
   bash "$SCRIPT_PATH" ios arm64
   bash "$SCRIPT_PATH" ios x86_64
   echo "✅ All iOS builds completed"
+  exit 0
+fi
+
+# Handle "all" for macOS - build both architectures
+if [[ "$PLATFORM" == "macos" && "$ARCH" == "all" ]]; then
+  echo "Building for all macOS architectures (Intel and Apple Silicon)..."
+  bash "$SCRIPT_PATH" macos x86_64
+  bash "$SCRIPT_PATH" macos arm64
+  echo "✅ All macOS builds completed"
   exit 0
 fi
 
@@ -130,6 +151,52 @@ if [[ "$PLATFORM" == "ios" ]]; then
 
   cmake --build . --config Release
   cmake --install .
+fi
+
+# =========================
+# macOS
+# =========================
+if [[ "$PLATFORM" == "macos" ]]; then
+  echo "Building for macOS: $ARCH"
+  
+  cmake $OPENCV_DIR \
+    -DCMAKE_OSX_ARCHITECTURES=$ARCH \
+    -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 \
+    $COMMON_CMAKE_OPTIONS
+
+  cmake --build . --target install -j$(sysctl -n hw.ncpu)
+fi
+
+# =========================
+# Windows
+# =========================
+if [[ "$PLATFORM" == "windows" ]]; then
+  echo "Building for Windows: $ARCH"
+  
+  # Assuming cross-compilation with MinGW (requires mingw-w64 installed)
+  cmake $OPENCV_DIR \
+    -DCMAKE_SYSTEM_NAME=Windows \
+    -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc \
+    -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++ \
+    $COMMON_CMAKE_OPTIONS
+
+  cmake --build . --target install -j$(sysctl -n hw.ncpu)
+fi
+
+# =========================
+# Linux
+# =========================
+if [[ "$PLATFORM" == "linux" ]]; then
+  echo "Building for Linux: $ARCH"
+  
+  # Assuming cross-compilation to Linux (requires appropriate toolchain)
+  cmake $OPENCV_DIR \
+    -DCMAKE_SYSTEM_NAME=Linux \
+    -DCMAKE_C_COMPILER=x86_64-linux-gnu-gcc \
+    -DCMAKE_CXX_COMPILER=x86_64-linux-gnu-g++ \
+    $COMMON_CMAKE_OPTIONS
+
+  cmake --build . --target install -j$(sysctl -n hw.ncpu)
 fi
 
 # =========================

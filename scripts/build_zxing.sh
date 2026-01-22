@@ -19,6 +19,11 @@ ROOT_BUILD_DIR="$REPO_ROOT/artifacts/build"
 #   ./build_zxing.sh ios arm64
 #   ./build_zxing.sh ios x86_64
 #   ./build_zxing.sh ios all      (builds both device and simulator)
+#   ./build_zxing.sh macos x86_64
+#   ./build_zxing.sh macos arm64
+#   ./build_zxing.sh macos all    (builds both x86_64 and arm64)
+#   ./build_zxing.sh windows x64
+#   ./build_zxing.sh linux x64
 
 PLATFORM=$1
 ARCH=$2
@@ -34,6 +39,11 @@ if [[ -z "$PLATFORM" || -z "$ARCH" ]]; then
   echo "  ./build_zxing.sh ios arm64            # Device"
   echo "  ./build_zxing.sh ios x86_64           # Simulator"
   echo "  ./build_zxing.sh ios all              # Both device and simulator"
+  echo "  ./build_zxing.sh macos x86_64         # Intel"
+  echo "  ./build_zxing.sh macos arm64          # Apple Silicon"
+  echo "  ./build_zxing.sh macos all            # Both Intel and Apple Silicon"
+  echo "  ./build_zxing.sh windows x64          # 64-bit Windows"
+  echo "  ./build_zxing.sh linux x64            # 64-bit Linux"
   exit 1
 fi
 
@@ -55,6 +65,15 @@ if [[ "$PLATFORM" == "ios" && "$ARCH" == "all" ]]; then
   bash "$SCRIPT_PATH" ios arm64
   bash "$SCRIPT_PATH" ios x86_64
   echo "✅ All iOS ZXing builds completed"
+  exit 0
+fi
+
+# Handle "all" for macOS - build both architectures
+if [[ "$PLATFORM" == "macos" && "$ARCH" == "all" ]]; then
+  echo "Building ZXing for all macOS architectures (Intel and Apple Silicon)..."
+  bash "$SCRIPT_PATH" macos x86_64
+  bash "$SCRIPT_PATH" macos arm64
+  echo "✅ All macOS ZXing builds completed"
   exit 0
 fi
 
@@ -113,6 +132,73 @@ if [[ "$PLATFORM" == "ios" ]]; then
     -DCMAKE_SYSTEM_NAME=iOS \
     -DCMAKE_OSX_ARCHITECTURES=$ARCH \
     -DCMAKE_OSX_SYSROOT=$(xcrun --sdk $SDK --show-sdk-path) \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DBUILD_SHARED_LIBS=OFF \
+    -DZXING_EXAMPLES=OFF \
+    -DZXING_BLACKBOX_TESTS=OFF \
+    -DZXING_UNIT_TESTS=OFF \
+    -DZXING_WRITERS=OFF \
+    -DZXING_C_API=OFF \
+    -DCMAKE_CXX_FLAGS_RELEASE="-O3 -ffunction-sections"
+
+  cmake --build . -j$CPU_COUNT
+fi
+
+# ===============================
+# macOS
+# ===============================
+if [[ "$PLATFORM" == "macos" ]]; then
+  echo "Building ZXing for macOS: $ARCH"
+
+  cmake "$ZXING_DIR" \
+    -DCMAKE_OSX_ARCHITECTURES=$ARCH \
+    -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DBUILD_SHARED_LIBS=OFF \
+    -DZXING_EXAMPLES=OFF \
+    -DZXING_BLACKBOX_TESTS=OFF \
+    -DZXING_UNIT_TESTS=OFF \
+    -DZXING_WRITERS=OFF \
+    -DZXING_C_API=OFF \
+    -DCMAKE_CXX_FLAGS_RELEASE="-O3 -ffunction-sections"
+
+  cmake --build . -j$CPU_COUNT
+fi
+
+# ===============================
+# Windows
+# ===============================
+if [[ "$PLATFORM" == "windows" ]]; then
+  echo "Building ZXing for Windows: $ARCH"
+
+  # Assuming cross-compilation with MinGW
+  cmake "$ZXING_DIR" \
+    -DCMAKE_SYSTEM_NAME=Windows \
+    -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc \
+    -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++ \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DBUILD_SHARED_LIBS=OFF \
+    -DZXING_EXAMPLES=OFF \
+    -DZXING_BLACKBOX_TESTS=OFF \
+    -DZXING_UNIT_TESTS=OFF \
+    -DZXING_WRITERS=OFF \
+    -DZXING_C_API=OFF \
+    -DCMAKE_CXX_FLAGS_RELEASE="-O3 -ffunction-sections"
+
+  cmake --build . -j$CPU_COUNT
+fi
+
+# ===============================
+# Linux
+# ===============================
+if [[ "$PLATFORM" == "linux" ]]; then
+  echo "Building ZXing for Linux: $ARCH"
+
+  # Assuming cross-compilation to Linux
+  cmake "$ZXING_DIR" \
+    -DCMAKE_SYSTEM_NAME=Linux \
+    -DCMAKE_C_COMPILER=x86_64-linux-gnu-gcc \
+    -DCMAKE_CXX_COMPILER=x86_64-linux-gnu-g++ \
     -DCMAKE_BUILD_TYPE=Release \
     -DBUILD_SHARED_LIBS=OFF \
     -DZXING_EXAMPLES=OFF \
