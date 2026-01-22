@@ -218,6 +218,11 @@ fi
 ARTIFACTS_DIST="$REPO_ROOT/artifacts/dist/zxing"
 DIST_LIBS_DIR="$ARTIFACTS_DIST/$PLATFORM-$ARCH"
 
+if [[ -d "$DIST_LIBS_DIR" ]]; then
+  echo "Removing existing $DIST_LIBS_DIR"
+  rm -rf "$DIST_LIBS_DIR"
+fi
+
 mkdir -p "$DIST_LIBS_DIR"
 
 echo "📦 Moving ZXing build to artifacts dist directory..."
@@ -233,5 +238,10 @@ echo "📂 Libs: $DIST_LIBS_DIR"
 ZIP_NAME="zxing-$PLATFORM-$ARCH.zip"
 echo "📦 Creating $ZIP_NAME..."
 cd "$ARTIFACTS_DIST"
+if [[ -f "$ZIP_NAME" ]]; then
+  echo "Removing existing $ZIP_NAME"
+  rm -f "$ZIP_NAME"
+fi
+
 zip -r "$ZIP_NAME" "$PLATFORM-$ARCH"
 echo "✅ Created $ARTIFACTS_DIST/$ZIP_NAME"

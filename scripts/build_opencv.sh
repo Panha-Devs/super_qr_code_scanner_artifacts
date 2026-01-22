@@ -174,6 +174,8 @@ if [[ "$PLATFORM" == "macos" ]]; then
   cmake $OPENCV_DIR \
     -DCMAKE_OSX_ARCHITECTURES=$ARCH \
     -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 \
+    -DWITH_KLEIDICV=OFF \
+    -DWITH_OPENEXR=OFF \
     $COMMON_CMAKE_OPTIONS
 
   cmake --build . --target install -j$(sysctl -n hw.ncpu)
@@ -217,6 +219,11 @@ fi
 ARTIFACTS_DIST="$REPO_ROOT/artifacts/dist/opencv"
 DIST_LIBS_DIR="$ARTIFACTS_DIST/$PLATFORM-$ARCH"
 
+if [[ -d "$DIST_LIBS_DIR" ]]; then
+  echo "  Remove existing files in $DIST_LIBS_DIR..."
+  rm -rf "$DIST_LIBS_DIR"
+fi
+
 mkdir -p "$DIST_LIBS_DIR"
 
 echo "📦 Moving build to artifacts dist directory..."
@@ -230,8 +237,8 @@ fi
 
 # Copy libraries to dist/{platform-abi}/
 echo "  Copying libraries for $PLATFORM-$ARCH..."
-if [[ "$PLATFORM" == "ios" ]]; then
-  # For iOS, copy only the main libraries with clean names (without version)
+if [[ "$PLATFORM" == "ios" || "$PLATFORM" == "macos" ]]; then
+  # For iOS and macOS, copy only the main libraries with clean names (without version)
   for lib in core imgproc imgcodecs; do
     cp "$SOURCE_LIB_DIR/libopencv_$lib.4.14.0.dylib" "$DIST_LIBS_DIR/libopencv_$lib.dylib"
   done
@@ -246,5 +253,9 @@ echo "📂 Libs: $DIST_LIBS_DIR"
 ZIP_NAME="opencv-$PLATFORM-$ARCH.zip"
 echo "📦 Creating $ZIP_NAME..."
 cd "$ARTIFACTS_DIST"
+if [[ -f "$ZIP_NAME" ]]; then
+  echo "Removing existing $ZIP_NAME"
+  rm -f "$ZIP_NAME"
+fi
 zip -r "$ZIP_NAME" "$PLATFORM-$ARCH"
 echo "✅ Created $ARTIFACTS_DIST/$ZIP_NAME"
