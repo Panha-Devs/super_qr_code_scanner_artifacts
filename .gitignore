@@ -9,3 +9,4 @@ logs/*
 .vscode/
 node_modules/
 .env
+scripts/run-build.sh
