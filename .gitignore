@@ -1,4 +1,8 @@
 dist/*
+!dist/opencv/
+!dist/zxing/
+dist/opencv/*
+dist/zxing/*
 !dist/opencv/*.zip
 !dist/zxing/*.zip
 build/*
