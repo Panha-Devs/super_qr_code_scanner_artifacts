@@ -35,7 +35,7 @@ flutter pub run super_qr_code_scanner:setup
 
 ### Building Libraries
 
-Libraries are built using CMake and stored in the `build/` directory. The build scripts are located in the main plugin repository.
+Libraries are built using CMake and stored in the `dist/` directory. The build scripts are located in the main plugin repository.
 
 ### Creating Releases
 
@@ -49,10 +49,11 @@ Libraries are built using CMake and stored in the `build/` directory. The build 
 
 ```
 artifacts/
-├── build/           # Build outputs (ignored by git)
+├── dist/           # Build outputs (ignored by git)
 │   ├── *.zip       # Release assets (tracked)
 │   └── ...         # Build directories (ignored)
-├── .gitignore      # Ignores build dirs but keeps ZIPs
+├── scripts/        # Build scripts
+├── .gitignore      # Ignores dist dirs but keeps ZIPs
 └── README.md       # This file
 ```
 

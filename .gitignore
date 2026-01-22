@@ -1,2 +1,2 @@
-build/*
-!build/*.zip
+dist/*
+!dist/*.zip

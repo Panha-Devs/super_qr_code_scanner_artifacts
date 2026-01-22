@@ -130,15 +130,14 @@ if [[ "$PLATFORM" == "ios" ]]; then
 fi
 
 # =========================
-# MOVE TO PLUGIN DIRECTORY
+# MOVE TO ARTIFACTS DIST DIRECTORY
 # =========================
-PLUGIN_OPENCV_BASE="/Users/vtech/CodeWorkspaces/C++/qr_code_scanner/flutter_plugin/super_qr_code_scanner/src/opencv"
-PLUGIN_INCLUDE_DIR="$PLUGIN_OPENCV_BASE/include"
-PLUGIN_LIBS_DIR="$PLUGIN_OPENCV_BASE/libs/$PLATFORM-$ARCH"
+ARTIFACTS_DIST="$REPO_ROOT/dist"
+DIST_LIBS_DIR="$ARTIFACTS_DIST/$PLATFORM-$ARCH"
 
-mkdir -p "$PLUGIN_LIBS_DIR"
+mkdir -p "$DIST_LIBS_DIR"
 
-echo "📦 Moving build to plugin directory..."
+echo "📦 Moving build to artifacts dist directory..."
 
 # Determine source paths based on platform
 if [[ "$PLATFORM" == "android" ]]; then
@@ -149,19 +148,16 @@ else
   SOURCE_LIB_DIR="$INSTALL_DIR/lib"
 fi
 
-# Copy headers (only once, they're platform-independent)
-if [[ ! -d "$PLUGIN_INCLUDE_DIR" ]]; then
-  echo "  Copying headers..."
-  cp -r "$SOURCE_INCLUDE_DIR" "$PLUGIN_INCLUDE_DIR"
-else
-  echo "  Headers already exist, skipping..."
-fi
-
-# Copy libraries to libs/{platform-abi}/
+# Copy libraries to dist/{platform-abi}/
 echo "  Copying libraries for $PLATFORM-$ARCH..."
-rm -rf "$PLUGIN_LIBS_DIR"
-cp -r "$SOURCE_LIB_DIR" "$PLUGIN_LIBS_DIR"
+cp -r "$SOURCE_LIB_DIR"/* "$DIST_LIBS_DIR/"
 
 echo "✅ OpenCV build completed:"
-echo "📂 Headers: $PLUGIN_INCLUDE_DIR"
-echo "📂 Libs: $PLUGIN_LIBS_DIR"
+echo "📂 Libs: $DIST_LIBS_DIR"
+
+# Create ZIP
+ZIP_NAME="opencv-$PLATFORM-$ARCH.zip"
+echo "📦 Creating $ZIP_NAME..."
+cd "$ARTIFACTS_DIST"
+zip -r "$ZIP_NAME" "$PLATFORM-$ARCH"
+echo "✅ Created $ARTIFACTS_DIST/$ZIP_NAME"

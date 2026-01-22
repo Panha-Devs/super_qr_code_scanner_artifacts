@@ -123,34 +123,25 @@ if [[ "$PLATFORM" == "ios" ]]; then
 fi
 
 # ===============================
-# MOVE TO PLUGIN DIRECTORY
+# MOVE TO ARTIFACTS DIST DIRECTORY
 # ===============================
-PLUGIN_ZXING_BASE="/Users/vtech/CodeWorkspaces/C++/qr_code_scanner/flutter_plugin/super_qr_code_scanner/src/zxing"
-PLUGIN_INCLUDE_DIR="$PLUGIN_ZXING_BASE/include"
-PLUGIN_LIBS_DIR="$PLUGIN_ZXING_BASE/libs/$PLATFORM-$ARCH"
+ARTIFACTS_DIST="$REPO_ROOT/dist"
+DIST_LIBS_DIR="$ARTIFACTS_DIST/$PLATFORM-$ARCH"
 
-mkdir -p "$PLUGIN_LIBS_DIR"
+mkdir -p "$DIST_LIBS_DIR"
 
-echo "📦 Moving ZXing build to plugin directory..."
-
-# Copy headers (only once, they're platform-independent)
-if [[ ! -d "$PLUGIN_INCLUDE_DIR" ]]; then
-  echo "  Copying headers..."
-  mkdir -p "$PLUGIN_INCLUDE_DIR"
-  # Copy only .h header files, preserving directory structure
-  cd "$ZXING_DIR/core/src"
-  find . -name "*.h" -exec rsync -R {} "$PLUGIN_INCLUDE_DIR/" \;
-  cd "$BUILD_DIR"
-else
-  echo "  Headers already exist, skipping..."
-fi
+echo "📦 Moving ZXing build to artifacts dist directory..."
 
 # Copy library
 echo "  Copying library for $PLATFORM-$ARCH..."
-rm -rf "$PLUGIN_LIBS_DIR"
-mkdir -p "$PLUGIN_LIBS_DIR"
-cp core/libZXing.a "$PLUGIN_LIBS_DIR/"
+cp core/libZXing.a "$DIST_LIBS_DIR/"
 
 echo "✅ ZXing build completed:"
-echo "📂 Headers: $PLUGIN_INCLUDE_DIR"
-echo "📂 Libs: $PLUGIN_LIBS_DIR"
+echo "📂 Libs: $DIST_LIBS_DIR"
+
+# Create ZIP
+ZIP_NAME="zxing-$PLATFORM-$ARCH.zip"
+echo "📦 Creating $ZIP_NAME..."
+cd "$ARTIFACTS_DIST"
+zip -r "$ZIP_NAME" "$PLATFORM-$ARCH"
+echo "✅ Created $ARTIFACTS_DIST/$ZIP_NAME"
