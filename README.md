@@ -18,10 +18,10 @@ Each release contains ZIP files for different platforms and architectures:
 | Platform | Architectures | Status |
 |----------|---------------|--------|
 | Android | arm64-v8a, armeabi-v7a | ✅ Available |
-| iOS | arm64, x86_64 | 🚧 Planned |
-| macOS | arm64, x86_64 | 🚧 Planned |
-| Linux | x64 | 🚧 Planned |
-| Windows | x64 | 🚧 Planned |
+| iOS | arm64, x86_64 | ✅ Available |
+| macOS | arm64, x86_64 | ✅ Available |
+| Linux | x64 | ⚠️ Experimental |
+| Windows | x64 | ⚠️ Experimental |
 
 ## For Plugin Users
 
@@ -39,11 +39,14 @@ Libraries are built using CMake and stored in the `dist/` directory. The build s
 
 ### Creating Releases
 
-1. Build the libraries for target platforms
-2. Create ZIP archives: `zip -r {lib}-{platform}-{abi}.zip {platform}-{abi}/`
-3. Create a new GitHub release
-4. Upload the ZIP files as release assets
-5. Update the `releaseTag` in the plugin's `bin/setup.dart`
+Releases are automated via GitHub Actions:
+
+1. Build the libraries for target platforms using the build scripts
+2. Commit and push the updated `dist/` ZIP files
+3. Create and push a version tag (e.g., `v1.0.0`)
+4. GitHub Actions automatically creates the release and uploads all ZIP assets
+
+The workflow is defined in `.github/workflows/release.yml`.
 
 ### Repository Structure
 
