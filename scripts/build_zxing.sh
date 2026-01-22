@@ -4,10 +4,10 @@ set -e
 # ===============================
 # CONFIG
 # ===============================
-REPO_ROOT="$(pwd)"
-SCRIPT_DIR="$(pwd)/scripts"
+REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+SCRIPT_DIR="$(dirname "$0")"
 ZXING_DIR="$REPO_ROOT/zxing-cpp"
-ROOT_BUILD_DIR="$(pwd)/build"
+ROOT_BUILD_DIR="$REPO_ROOT/artifacts/build"
 
 # ===============================
 # ARGUMENTS
@@ -128,7 +128,7 @@ fi
 # ===============================
 # MOVE TO ARTIFACTS DIST DIRECTORY
 # ===============================
-ARTIFACTS_DIST="$REPO_ROOT/dist"
+ARTIFACTS_DIST="$REPO_ROOT/artifacts/dist"
 DIST_LIBS_DIR="$ARTIFACTS_DIST/$PLATFORM-$ARCH"
 
 mkdir -p "$DIST_LIBS_DIR"
