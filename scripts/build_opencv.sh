@@ -5,10 +5,10 @@ set -e
 # CONFIG
 # =========================
 OPENCV_VERSION=4.13.0
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-REPO_ROOT="$(dirname "$SCRIPT_DIR")"
+REPO_ROOT="$(pwd)"
+SCRIPT_DIR="$(pwd)/scripts"
 OPENCV_DIR="$REPO_ROOT/opencv"
-ROOT_BUILD_DIR="$REPO_ROOT/custom_build/build"
+ROOT_BUILD_DIR="$(pwd)/build"
 
 # =========================
 # ARGUMENTS
@@ -22,8 +22,8 @@ ROOT_BUILD_DIR="$REPO_ROOT/custom_build/build"
 PLATFORM=$1
 ARCH=$2
 
-# Default NDK path
-ANDROID_NDK_HOME="${ANDROID_NDK_HOME:-/Users/vtech/Library/Android/sdk/ndk/28.2.13676358}"
+# NDK path (must be set in environment)
+ANDROID_NDK_HOME="$ANDROID_NDK_HOME"
 
 if [[ -z "$PLATFORM" || -z "$ARCH" ]]; then
   echo "Usage:"
