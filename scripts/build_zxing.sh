@@ -79,6 +79,7 @@ fi
 
 BUILD_DIR=$ROOT_BUILD_DIR/zxing-$PLATFORM-$ARCH
 
+rm -rf "$BUILD_DIR"
 mkdir -p "$BUILD_DIR"
 cd "$BUILD_DIR"
 
@@ -214,7 +215,7 @@ fi
 # ===============================
 # MOVE TO ARTIFACTS DIST DIRECTORY
 # ===============================
-ARTIFACTS_DIST="$REPO_ROOT/artifacts/dist"
+ARTIFACTS_DIST="$REPO_ROOT/artifacts/dist/zxing"
 DIST_LIBS_DIR="$ARTIFACTS_DIST/$PLATFORM-$ARCH"
 
 mkdir -p "$DIST_LIBS_DIR"

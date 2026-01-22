@@ -81,6 +81,7 @@ fi
 BUILD_DIR=$ROOT_BUILD_DIR/$PLATFORM-$ARCH
 INSTALL_DIR=$BUILD_DIR/install
 
+rm -rf "$BUILD_DIR"
 mkdir -p "$BUILD_DIR"
 cd "$BUILD_DIR"
 
@@ -202,7 +203,7 @@ fi
 # =========================
 # MOVE TO ARTIFACTS DIST DIRECTORY
 # =========================
-ARTIFACTS_DIST="$REPO_ROOT/artifacts/dist"
+ARTIFACTS_DIST="$REPO_ROOT/artifacts/dist/opencv"
 DIST_LIBS_DIR="$ARTIFACTS_DIST/$PLATFORM-$ARCH"
 
 mkdir -p "$DIST_LIBS_DIR"
