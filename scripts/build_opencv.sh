@@ -93,7 +93,10 @@ COMMON_CMAKE_OPTIONS="
 # ANDROID
 # =========================
 if [[ "$PLATFORM" == "android" ]]; then
-  if [[ ! -d "$ANDROID_NDK_HOME" ]]; then
+  if [[ -z "$ANDROID_NDK_HOME" ]]; then
+    echo "Error: ANDROID_NDK_HOME environment variable must be set for Android builds"
+    exit 1
+  elif [[ ! -d "$ANDROID_NDK_HOME" ]]; then
     echo "Error: Android NDK not found at $ANDROID_NDK_HOME"
     exit 1
   fi
