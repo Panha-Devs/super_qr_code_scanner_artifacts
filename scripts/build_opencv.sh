@@ -143,11 +143,22 @@ fi
 # iOS
 # =========================
 if [[ "$PLATFORM" == "ios" ]]; then
+  if [[ "$ARCH" == "x86_64" ]]; then
+    SDK="iphonesimulator"
+  else
+    SDK="iphoneos"
+  fi
+
   cmake $OPENCV_DIR \
     -G Xcode \
     -DCMAKE_SYSTEM_NAME=iOS \
     -DCMAKE_OSX_ARCHITECTURES=$ARCH \
     -DCMAKE_OSX_DEPLOYMENT_TARGET=12.0 \
+    -DCMAKE_OSX_SYSROOT=$(xcrun --sdk $SDK --show-sdk-path) \
+    -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY="-" \
+    -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED=NO \
+    -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED=NO \
+    -DCMAKE_SHARED_LINKER_FLAGS="-framework CoreGraphics" \
     $COMMON_CMAKE_OPTIONS
 
   cmake --build . --config Release
@@ -212,16 +223,21 @@ echo "📦 Moving build to artifacts dist directory..."
 
 # Determine source paths based on platform
 if [[ "$PLATFORM" == "android" ]]; then
-  SOURCE_INCLUDE_DIR="$INSTALL_DIR/sdk/native/jni/include"
   SOURCE_LIB_DIR="$INSTALL_DIR/sdk/native/libs/$ARCH"
 else
-  SOURCE_INCLUDE_DIR="$INSTALL_DIR/include"
   SOURCE_LIB_DIR="$INSTALL_DIR/lib"
 fi
 
 # Copy libraries to dist/{platform-abi}/
 echo "  Copying libraries for $PLATFORM-$ARCH..."
-cp -r "$SOURCE_LIB_DIR"/* "$DIST_LIBS_DIR/"
+if [[ "$PLATFORM" == "ios" ]]; then
+  # For iOS, copy only the main libraries with clean names (without version)
+  for lib in core imgproc imgcodecs; do
+    cp "$SOURCE_LIB_DIR/libopencv_$lib.4.14.0.dylib" "$DIST_LIBS_DIR/libopencv_$lib.dylib"
+  done
+else
+  cp -r "$SOURCE_LIB_DIR"/* "$DIST_LIBS_DIR/"
+fi
 
 echo "✅ OpenCV build completed:"
 echo "📂 Libs: $DIST_LIBS_DIR"
