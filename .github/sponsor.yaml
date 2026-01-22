@@ -1,0 +1,24 @@
+tiers:
+  - name: Supporter
+    monthly_price_in_cents: 99
+    description: Support the development of Super QR Code Scanner
+    benefits:
+      - Early access to new features
+      - Priority bug fixes
+      - Recognition in the project
+
+  - name: Sponsor
+    monthly_price_in_cents: 299
+    description: Become a sponsor and help grow the project
+    benefits:
+      - All Supporter benefits
+      - Logo on the project website
+      - Direct communication with the developer
+
+  - name: Enterprise
+    monthly_price_in_cents: 499
+    description: For organizations needing advanced support
+    benefits:
+      - All Sponsor benefits
+      - Custom integrations
+      - Dedicated support channel
