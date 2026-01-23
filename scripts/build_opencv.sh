@@ -86,13 +86,22 @@ mkdir -p "$BUILD_DIR"
 cd "$BUILD_DIR"
 
 # =========================
+# SHARED LIBS CONFIG
+# =========================
+if [[ "$PLATFORM" == "ios" || "$PLATFORM" == "macos" ]]; then
+  BUILD_SHARED_LIBS="OFF"
+else
+  BUILD_SHARED_LIBS="ON"
+fi
+
+# =========================
 # COMMON OPTIONS
 # =========================
 COMMON_CMAKE_OPTIONS="
 -DCMAKE_BUILD_TYPE=Release
 -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR
 -DBUILD_LIST=core,imgproc,imgcodecs
--DBUILD_SHARED_LIBS=ON
+-DBUILD_SHARED_LIBS=$BUILD_SHARED_LIBS
 -DBUILD_TESTS=OFF
 -DBUILD_PERF_TESTS=OFF
 -DBUILD_EXAMPLES=OFF
@@ -109,6 +118,10 @@ COMMON_CMAKE_OPTIONS="
 -DWITH_OPENCL=OFF
 -DWITH_VULKAN=OFF
 -DWITH_CUDA=OFF
+-DWITH_WEBP=OFF
+-DWITH_OPENEXR=OFF
+-DWITH_JASPER=OFF
+-DWITH_OPENJPEG=OFF
 "
 
 # =========================
@@ -238,10 +251,12 @@ fi
 # Copy libraries to dist/{platform-abi}/
 echo "  Copying libraries for $PLATFORM-$ARCH..."
 if [[ "$PLATFORM" == "ios" || "$PLATFORM" == "macos" ]]; then
-  # For iOS and macOS, copy only the main libraries with clean names (without version)
+  # For iOS and macOS, copy static libraries (.a files)
   for lib in core imgproc imgcodecs; do
-    cp "$SOURCE_LIB_DIR/libopencv_$lib.4.14.0.dylib" "$DIST_LIBS_DIR/libopencv_$lib.dylib"
+    cp "$SOURCE_LIB_DIR/libopencv_$lib.a" "$DIST_LIBS_DIR/libopencv_$lib.a"
   done
+  # Copy 3rdparty dependencies
+  cp "$INSTALL_DIR/lib/opencv4/3rdparty/"*.a "$DIST_LIBS_DIR/"
 else
   cp -r "$SOURCE_LIB_DIR"/* "$DIST_LIBS_DIR/"
 fi
