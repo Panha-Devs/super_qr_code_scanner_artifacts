@@ -189,6 +189,10 @@ if [[ "$PLATFORM" == "macos" ]]; then
     -DCMAKE_OSX_DEPLOYMENT_TARGET=10.15 \
     -DWITH_KLEIDICV=OFF \
     -DWITH_OPENEXR=OFF \
+    -DWITH_CAROTENE=OFF \
+    -DWITH_ITT=OFF \
+    -DWITH_TIFF=OFF \
+    -DBUILD_TIFF=OFF \
     $COMMON_CMAKE_OPTIONS
 
   cmake --build . --target install -j$(sysctl -n hw.ncpu)
