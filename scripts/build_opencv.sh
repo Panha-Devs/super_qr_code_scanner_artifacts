@@ -23,7 +23,7 @@ ROOT_BUILD_DIR="$REPO_ROOT/artifacts/build"
 #   ./build_opencv.sh macos x86_64
 #   ./build_opencv.sh macos arm64
 #   ./build_opencv.sh macos all            # Both x86_64 and arm64
-#   ./build_opencv.sh windows x64
+#   ./build_opencv.sh windows x64          # Run on Windows machine with Visual Studio
 #   ./build_opencv.sh linux x64
 
 PLATFORM=$1
@@ -204,14 +204,13 @@ fi
 if [[ "$PLATFORM" == "windows" ]]; then
   echo "Building for Windows: $ARCH"
   
-  # Assuming cross-compilation with MinGW (requires mingw-w64 installed)
+  # Native Windows build using MSVC (run on Windows machine)
   cmake $OPENCV_DIR \
-    -DCMAKE_SYSTEM_NAME=Windows \
-    -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc \
-    -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++ \
+    -G "Visual Studio 17 2022" \
+    -A x64 \
     $COMMON_CMAKE_OPTIONS
 
-  cmake --build . --target install -j$(sysctl -n hw.ncpu)
+  cmake --build . --config Release --target install
 fi
 
 # =========================
@@ -248,6 +247,11 @@ echo "📦 Moving build to artifacts dist directory..."
 # Determine source paths based on platform
 if [[ "$PLATFORM" == "android" ]]; then
   SOURCE_LIB_DIR="$INSTALL_DIR/sdk/native/libs/$ARCH"
+elif [[ "$PLATFORM" == "windows" ]]; then
+  # Windows MSVC output folder
+  SOURCE_LIB_DIR="$INSTALL_DIR/x64/vc17"
+  BIN_DIR="$SOURCE_LIB_DIR/bin"
+  LIB_DIR="$SOURCE_LIB_DIR/lib"
 else
   SOURCE_LIB_DIR="$INSTALL_DIR/lib"
 fi
@@ -261,6 +265,11 @@ if [[ "$PLATFORM" == "ios" || "$PLATFORM" == "macos" ]]; then
   done
   # Copy 3rdparty dependencies
   cp "$INSTALL_DIR/lib/opencv4/3rdparty/"*.a "$DIST_LIBS_DIR/"
+elif [[ "$PLATFORM" == "windows" ]]; then
+  # Copy DLLs
+  cp "$BIN_DIR"/*.dll "$DIST_LIBS_DIR/"
+  # Copy LIBs
+  cp "$LIB_DIR"/*.lib "$DIST_LIBS_DIR/"
 else
   cp -r "$SOURCE_LIB_DIR"/* "$DIST_LIBS_DIR/"
 fi

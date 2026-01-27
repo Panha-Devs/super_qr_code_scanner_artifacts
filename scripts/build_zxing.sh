@@ -22,7 +22,7 @@ ROOT_BUILD_DIR="$REPO_ROOT/artifacts/build"
 #   ./build_zxing.sh macos x86_64
 #   ./build_zxing.sh macos arm64
 #   ./build_zxing.sh macos all    (builds both x86_64 and arm64)
-#   ./build_zxing.sh windows x64
+#   ./build_zxing.sh windows x64          # Run on Windows machine with Visual Studio
 #   ./build_zxing.sh linux x64
 
 PLATFORM=$1
@@ -83,7 +83,11 @@ rm -rf "$BUILD_DIR"
 mkdir -p "$BUILD_DIR"
 cd "$BUILD_DIR"
 
-CPU_COUNT=$(sysctl -n hw.ncpu)
+if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" ]]; then
+    CPU_COUNT=$NUMBER_OF_PROCESSORS
+else
+    CPU_COUNT=$(sysctl -n hw.ncpu)
+fi
 
 # ===============================
 # ANDROID
@@ -172,21 +176,19 @@ fi
 if [[ "$PLATFORM" == "windows" ]]; then
   echo "Building ZXing for Windows: $ARCH"
 
-  # Assuming cross-compilation with MinGW
+  # Native Windows build using MSVC (run on Windows machine)
   cmake "$ZXING_DIR" \
-    -DCMAKE_SYSTEM_NAME=Windows \
-    -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc \
-    -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++ \
+    -G "Visual Studio 17 2022" \
+    -A x64 \
     -DCMAKE_BUILD_TYPE=Release \
-    -DBUILD_SHARED_LIBS=OFF \
+    -DBUILD_SHARED_LIBS=ON \
     -DZXING_EXAMPLES=OFF \
     -DZXING_BLACKBOX_TESTS=OFF \
     -DZXING_UNIT_TESTS=OFF \
     -DZXING_WRITERS=OFF \
-    -DZXING_C_API=OFF \
-    -DCMAKE_CXX_FLAGS_RELEASE="-O3 -ffunction-sections"
+    -DZXING_C_API=OFF
 
-  cmake --build . -j$CPU_COUNT
+  cmake --build . --config Release
 fi
 
 # ===============================
@@ -229,7 +231,14 @@ echo "📦 Moving ZXing build to artifacts dist directory..."
 
 # Copy library
 echo "  Copying library for $PLATFORM-$ARCH..."
-cp core/libZXing.a "$DIST_LIBS_DIR/"
+if [[ "$PLATFORM" == "windows" ]]; then
+  # MSVC produces .lib (import) and .dll files for shared libraries
+  cp core/Release/ZXing.lib "$DIST_LIBS_DIR/"
+  cp core/Release/ZXing.dll "$DIST_LIBS_DIR/"
+else
+  # GCC/MinGW produces .a files for static libraries
+  cp core/libZXing.a "$DIST_LIBS_DIR/"
+fi
 
 echo "✅ ZXing build completed:"
 echo "📂 Libs: $DIST_LIBS_DIR"
