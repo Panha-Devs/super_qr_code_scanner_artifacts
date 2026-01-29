@@ -21,7 +21,7 @@ Each release contains ZIP files for different platforms and architectures:
 | iOS | arm64, x86_64 | ✅ Available |
 | macOS | arm64, x86_64 | ✅ Available |
 | Linux | x64 | ⚠️ Experimental |
-| Windows | x64 | ⚠️ Experimental |
+| Windows | x64 | ✅ Available |
 
 ## For Plugin Users
 
