@@ -128,6 +128,14 @@ COMMON_CMAKE_OPTIONS="
 # ANDROID
 # =========================
 if [[ "$PLATFORM" == "android" ]]; then
+  if [[ -z "$ANDROID_SDK_ROOT" ]]; then
+    echo "Error: ANDROID_SDK_ROOT environment variable must be set for Android builds"
+    exit 1
+  elif [[ ! -d "$ANDROID_SDK_ROOT" ]]; then
+    echo "Error: Android SDK not found at $ANDROID_SDK_ROOT"
+    exit 1
+  fi
+
   if [[ -z "$ANDROID_NDK_HOME" ]]; then
     echo "Error: ANDROID_NDK_HOME environment variable must be set for Android builds"
     exit 1
@@ -136,6 +144,7 @@ if [[ "$PLATFORM" == "android" ]]; then
     exit 1
   fi
   
+  echo "Using Android SDK: $ANDROID_SDK_ROOT"
   echo "Using NDK: $ANDROID_NDK_HOME"
   echo "Building for ABI: $ARCH"
 
@@ -144,12 +153,41 @@ if [[ "$PLATFORM" == "android" ]]; then
     -DANDROID_ABI=$ARCH \
     -DANDROID_PLATFORM=android-24 \
     -DANDROID_STL=c++_shared \
+    -DCPU_BASELINE=NEON \
+    -DCPU_DISPATCH= \
+    -DWITH_PNG=ON \
+    -DWITH_JPEG=ON \
+    -DWITH_TIFF=OFF \
+    -DOPENCV_ENABLE_ALLOCATOR_STATS=OFF \
     -DBUILD_ANDROID_PROJECTS=OFF \
     -DBUILD_ANDROID_EXAMPLES=OFF \
     -DBUILD_JAVA=OFF \
-    $COMMON_CMAKE_OPTIONS
+    -DWITH_PROTOBUF=OFF \
+    -DWITH_FFMPEG=OFF \
+    -DWITH_GSTREAMER=OFF \
+    -DWITH_OPENGL=OFF \
+    -DBUILD_TIFF=OFF \
+    -DBUILD_WEBP=OFF \
+    -DBUILD_OPENEXR=OFF \
+    -DBUILD_JASPER=OFF \
+    -DBUILD_OPENJPEG=OFF \
+    $COMMON_CMAKE_OPTIONS  # Common minimal options
 
   cmake --build . --target install -j$(sysctl -n hw.ncpu)
+
+  # =========================
+  # Strip unneeded symbols to reduce size
+  # =========================
+  echo "Stripping OpenCV shared libraries to reduce size..."
+  INSTALL_LIB_DIR="$INSTALL_DIR/sdk/native/libs/$ARCH"
+  for lib in libopencv_core.so libopencv_imgproc.so libopencv_imgcodecs.so; do
+    if [[ -f "$INSTALL_LIB_DIR/$lib" ]]; then
+      "$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/darwin-x86_64/bin/llvm-strip" --strip-unneeded "$INSTALL_LIB_DIR/$lib"
+      echo "  Stripped $lib"
+    fi
+  done
+
+  echo "✅ Android OpenCV build completed for $ARCH"
 fi
 
 # =========================
