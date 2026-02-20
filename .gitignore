@@ -1,4 +1,5 @@
 dist/*
+!dist/*.zip
 !dist/opencv/
 !dist/zxing/
 dist/opencv/*
